@@ -1,121 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=shopping_bag_speed" />
-    <title>Lista de Catálogo</title>
+    <title>Visor de PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+        body{
+            background-color: black;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #111;
-            font-family: Arial, sans-serif;
-            color: #fff;
-            padding: 20px;
-        }
-
-        .pdf-container {
+        #pdf-viewer {
             width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
         }
-
-        iframe {
-            width: 100%;
-            height: 100vh;
-            border: none;
-        }
-
-        footer {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .social-links a {
-            text-decoration: none;
-            color: #fff;
-            font-size: 24px;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .social-links a.mercadolibre { background-color: #ffe600; color: #000; }
-        .social-links a.instagram { background-color: #e4405f; }
-        .social-links a.whatsapp { background-color: #25d366; }
-        .social-links a.website { background-color: #007bff; }
-        .social-links a:hover { opacity: 0.8; transform: scale(1.1); }
-
-        @media (max-width: 768px) {
-            body {
-                font-size: 14px;
-                padding: 10px;
-            }
-            .pdf-container {
-                height: 100vh;
-            }
-            iframe {
-                height: 100vh;
-            }
-            .social-links a {
-                font-size: 20px;
-                width: 40px;
-                height: 40px;
-            }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
         }
     </style>
 </head>
 <body>
+    <h1>Catalogo Laincop</h1>
+    <img src="./laincopbanner.png" alt="" width="100%">
+    <div id="pdf-viewer"></div>
 
-    <div class="pdf-container">
-        <iframe src="./assets/LISTA DE PRECIOS LAINCOP 19-02-2025 .pdf"></iframe>
-    </div>
+    <script>
+        const url = "LISTA DE PRECIOS LAINCOP 19-02-2025 .pdf"; // Cambia esto por la ruta de tu PDF
 
-    <footer>
-        <div class="social-links">
-            <a href="https://listado.mercadolibre.com.ar/pagina/laincopsas/" class="mercadolibre" target="_blank">
-                <span class="material-symbols-outlined">shopping_bag_speed</span>
-            </a>
-            <a href="https://www.instagram.com/laincop.seg/" class="instagram" target="_blank">
-                <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://api.whatsapp.com/send/?phone=5491138921130&text&type=phone_number&app_absent=0" class="whatsapp" target="_blank">
-                <i class="fab fa-whatsapp"></i>
-            </a>
-            <a href="https://laincop.com.ar/" class="website" target="_blank">
-                <i class="fas fa-globe"></i>
-            </a>
-        </div>
-    </footer>
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
+        const loadPDF = async () => {
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const viewer = document.getElementById("pdf-viewer");
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const canvas = document.createElement("canvas");
+                viewer.appendChild(canvas);
+                const context = canvas.getContext("2d");
+
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+            }
+        };
+
+        loadPDF();
+    </script>
 </body>
 </html>
